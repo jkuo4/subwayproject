@@ -1,0 +1,91 @@
+---
+title: "EDAV Project"
+author: "Addison Ying"
+date: "4/1/2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE,
+                      message = FALSE)
+```
+
+
+```{r}
+library(tidyverse)
+library(forcats)
+library(ggplot2)
+
+path <- "/Users/AddisonYing/Downloads/NYC_Dogs.csv"
+dogs <- read.csv(path, 1)
+
+# simplify varible names 
+colnames(dogs)[colnames(dogs) == 'AnimalName'] <- 'name'
+colnames(dogs)[colnames(dogs) == 'AnimalGender'] <- 'gender'
+colnames(dogs)[colnames(dogs) == 'BreedName'] <- 'breed'
+
+
+# the geographic dynamics
+# phase 1 impact areas: 
+# 97 - 116 st: 10029
+# 87 - 96 st: 10128  has the most dogs in UES!
+# 81 - 86 st: 10028
+# 61 - 80 st: 10021
+
+phase1 <- c("10029", "10128","10028" , "10021") 
+#subsetting df to phase1 area 
+dogs1 <- subset(dogs, dogs$ZipCode %in% phase1, select = c("Borough", "ZipCode", "breed", "gender","LicenseIssuedDate", "LicenseExpiredDate"))
+
+zip_phase1 <- factor(dogs1$ZipCode)
+ggplot(dogs1, aes(x = zip_phase1)) + geom_bar(fill = "lightslateblue")
+
+```
+
+What kind of dogs live in this neighbood, and their gender? 
+
+- Gender: Lady dogs and male dogs are about the same, with slight more male dogs. 
+- Breed: 
+
+```{r pressure, echo=FALSE}
+
+# cleaning: drop empty levels "" and " "
+dogs1$gender[dogs1$gender == ""] <- "F"
+dogs1$gender[dogs1$gender == " "] <- "M"
+dogs1$gender <- droplevels(dogs1$gender)
+
+# the gender difference of dogs 
+ggplot(dogs1, aes(x = dogs1$gender, fill = factor(dogs1$gender))) + 
+  ylab("Number of dogs") + 
+  xlab("Gender of the dogs") + 
+  geom_bar() + coord_flip() +
+  theme(legend.title=element_blank()) +
+  scale_fill_manual(values = c("plum","slateblue2"))
+
+```
+
+
+What kind of dogs live in this neighborhood:
+```{r pressure, echo=FALSE}
+
+dogs1_breed <- dogs1 %>% group_by(dogs1$breed) %>% summarize(counts = n()) %>% arrange(-counts) 
+
+# top 10 known breeds
+top10 <- dogs1_breed[2:11,]
+names(top10) <- c("breed", "counts")
+
+# ordering the breeds by counts
+top10$breed <- factor(top10$breed, levels = top10$breed[order(top10$counts)])
+
+ggplot(top10, aes(x=breed, y=counts)) + 
+  geom_col(fill = "tan3") +
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+```
+
+```{r}
+dogs1_age <- subset(dogs, dogs$ZipCode %in% phase1, select = c( "ZipCode", "AnimalBirthMonth"))
+
+```
+
