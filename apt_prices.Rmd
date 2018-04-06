@@ -1,0 +1,74 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(ggplot2)
+library("readxl")
+library(reshape)
+library(dplyr)
+```
+
+Importing files
+
+```{r}
+data14 <- read_excel("2014_manhattan.xls",  col_names = TRUE, sheet = "Manhattan", skip = 4)
+data15 <- read_excel("2015_manhattan.xls",  col_names = TRUE, sheet = "Manhattan", skip = 4)
+data16 <- read_excel("2016_manhattan.xls",  col_names = TRUE, sheet = "Manhattan", skip = 4)
+
+df_list <- list(data14, data15, data16)
+data <- merge_recurse(df_list)
+```
+
+Cleaning Data:
+- Only looking at Tax Class = 2, which are apartment units
+- Looking at Sales Price > 0 and under 5M USD
+
+```{r}
+data$"SALE DATE\n" <- as.Date(data$"SALE DATE\n", "%m-%y")
+colnames(data)[colnames(data) == "SALE DATE\n"] <- 'SaleDate'
+colnames(data)[colnames(data) == "NEIGHBORHOOD\n"] <- 'Neighborhood'
+colnames(data)[colnames(data) == "SALE PRICE\n"] <- 'SalePrice'
+colnames(data)[colnames(data) == "ZIP CODE\n"] <- 'ZipCode'
+colnames(data)[colnames(data) == "TAX CLASS AT PRESENT\n"] <- 'TaxClass'
+data <- filter(data, grepl("2", TaxClass))
+data <- data[data$SalePrice > 100000,]
+data <- data[data$SalePrice < 5000000,]
+data$Sale_Year <- format(as.Date(data$SaleDate, '%Y'), "%Y")
+data$Sale_Month <- format(as.Date(data$SaleDate, '%m'), "%m")
+```
+
+Some simple graphs
+Box Plots by Year for Manhattan
+
+```{r}
+ggplot(data, aes(Sale_Year, SalePrice)) +
+  geom_boxplot()
+
+ggplot(data, aes(Neighborhood, SalePrice)) +
+  geom_boxplot() 
+```
+
+Box Plots By Year for UES Zipcodes (10021, 10028, 10044, 10065, 10075, 10128)
+```{r}
+
+#ues_zip = list(10021, 10028, 10044, 10065, 10075, 10128)
+ues_data <- filter(data, grepl("UPPER EAST", Neighborhood))
+
+ggplot(ues_data, aes(Neighborhood, SalePrice)) +
+  geom_boxplot()
+```
+
+```{r}
+print(nrow(ues_data))
+print(nrow(data))
+
+ddply(data, ~Neighborhood, summarise, AveragePrice = mean(SalePrice))
+
+#ggplot(aes(x = SaleDate, y = variable), data = data) + geom_line()
+```
