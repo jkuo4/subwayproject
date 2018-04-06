@@ -43,15 +43,11 @@ http://gothamist.com/2016/12/29/2nd_ave_subway_explainer.php#photo-1
 Phase 1: $4.5 Billion
 Phase 2: ???
 
-### Break down into end to end tests
-
-Explain what these tests test and why
-
 ```
 Give an example
 ```
 
-### TODO:
+## TODO:
 
 Jason
 
@@ -78,9 +74,6 @@ get number of subway riders by turnstile data in nearest subways, reduce that by
 * **Jason Kuo** - *Readme Creator* - [Jkuo4](https://github.com/jkuo4)
 * **Sharon Tsao** - *Planning Expert and Makes Great Cookies* - [Blooraspberry](https://github.com/Blooraspberry)
 
-## License
-
-PLACEHOLDER 
 
 ## Acknowledgments
 
