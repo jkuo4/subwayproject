@@ -1,0 +1,252 @@
+---
+title: "EDAV project - Building Permits"
+author: "Andres"
+date: "April 4, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE,
+                      message = FALSE, 
+                      cache = TRUE)
+```
+
+## Analysis of Buliding Permits
+
+Read the original data file (1.4GB, 3,341,659 observations):
+
+```{r}
+library(tidyverse)
+permits <- read.csv("DOB_Permit_Issuance.csv")
+head(permits)
+```
+
+
+
+```{r}
+#permits_2nd_phase <- filter(permits, BOROUGH=="MANHATTAN" & Block %in% c(1654:1656,1665:1667, #1788:1791, 1647:1652,1659:1662,1783:1787,1676:1678, 1687:1689,1801:1803,1669:1675,1680:1684, #1795:1797,1625:1640,1643:1645,1667:1776,1691,1693:1696,1699:1705,1708:1711,1713,1715:1716,        #1806:1808,1815,1816,1811,1813))
+#write.table(permits_2nd_phase, file="permits_2nd_phase.csv",sep=",",row.names=F)
+```
+
+
+
+Filter by Manhattan, upper-East Zip codes:
+
+
+```{r}
+permits_upper_east <- filter(permits, BOROUGH=="MANHATTAN" & Zip.Code %in% c(10065, 10021, 10075, 10028, 10128, 10029, 10036))
+head(permits_upper_east)
+colnames(permits_upper_east) #print column names
+```
+
+Select relevant columns and write new file 'DOB_Permit_Issuance-up_east.csv' for future use (reading the original file takes some time):
+
+```{r}
+permits_upper_east <- select(permits_upper_east, BOROUGH,House..,Street.Name,Job.Type,Block,Lot, Community.Board, Zip.Code,Bldg.Type,Residential,Work.Type,Permit.Type,Permit.Subtype,Filing.Date,Issuance.Date,Expiration.Date,Job.Start.Date,Owner.s.Business.Type,LATITUDE,LONGITUDE,COUNCIL_DISTRICT,NTA_NAME)
+head(permits_upper_east)
+write.table(permits_upper_east, file="DOB_Permit_Issuance-up_east_harlem.csv",sep=",",row.names=F)
+```
+
+Start frrom here next time (opening smaller file):
+
+```{r}
+permits_upper_east <- read.csv("DOB_Permit_Issuance-up_east.csv")
+head(permits_upper_east)
+```
+
+Convert dates from Factor to Date format:
+
+```{r}
+permits_upper_east$Filing.Date = as.Date(permits_upper_east$Filing.Date, format = "%m/%d/%Y")
+permits_upper_east$Issuance.Date = as.Date(permits_upper_east$Issuance.Date, format = "%m/%d/%Y")
+permits_upper_east$Expiration.Date = as.Date(permits_upper_east$Expiration.Date, format = "%m/%d/%Y")
+permits_upper_east$Job.Start.Date = as.Date(permits_upper_east$Job.Start.Date, format = "%m/%d/%Y")
+head(permits_upper_east)
+```
+
+Add a column called "Distance" and use the block number to record distance from 2nd ave line:
+
+```{r}
+#permits_upper_east <- read.csv("DOB_Permit_Issuance-up_east.csv")
+#permits_upper_east$Filing.Date = as.Date(permits_upper_east$Filing.Date, format = "%m/%d/%Y")
+#permits_upper_east$Issuance.Date = as.Date(permits_upper_east$Issuance.Date, format = "%m/%d/%Y")
+#permits_upper_east$Expiration.Date = as.Date(permits_upper_east$Expiration.Date, format = "%m/%d/%Y")
+#permits_upper_east$Job.Start.Date = as.Date(permits_upper_east$Job.Start.Date, format = "%m/%d/%Y")
+
+data <- permits_upper_east %>%
+  mutate(Distance = ifelse(Block %in% c(1424:1427, 1529:1532, 1539:1541),
+                           '1 block from station entrance (left side)',
+                          ifelse(Block %in% c(1423,1428:1433,1525:1528,1533:1538,1646),
+                                 '1 block left from line',
+                          ifelse(Block %in% c(1444:1447,1546:1549,1556:1558),
+                                  '1 block from station entrance (right side)',
+                          ifelse(Block %in% c(1443,1448:1453,1542:1545,1550:1555,1668),
+                                 '1 block right from line',
+                          ifelse(Block %in% c(1404:1407,1512:1515,1522:1524),
+                                  '2-3 blocks from station entrance (left side)',
+                          ifelse(Block %in% c(1403,1408:1413,1508:1511,1516:1521,1624),
+                                 '2-3 blocks left from line',
+                          ifelse(Block %in% c(1464:1467,1563:1566,1573),
+                                  '2 blocks from station entrance (right side)',
+                          ifelse(Block %in% c(1463,1468:1473,1559:1562,1567:1571,1690),
+                                 '2 blocks right from line',
+                          ifelse(Block %in% c(1482:1484,1580:1583),
+                                  '3 blocks from station entrance (right side)',
+                          ifelse(Block %in% c(1480,1485:1490,1576:1579,1584:1587),
+                                 '3 blocks right from line',
+                          ifelse(Block %in% c(1384:1387,1495:1498,1505:1507),
+                                  '4-5 blocks from station entrance (left side)',
+                          ifelse(Block %in% c(1383,1388:1393,1491:1494,1499:1504,1602),
+                                 '4-5 blocks left from line',
+                          ifelse(Block %in% c(1590, 1592),
+                                  '4 blocks from station entrance (right side)',
+                          ifelse(Block %in% c(1589),
+                                 '4 blocks right from line',
+                          ifelse(Block %in% c(1654:1656, 1665:1667, 1788:1791),
+                           '2 blocks from stations -phase 2- (1 block left from line)',
+                          ifelse(Block %in% c(1647:1652,1659:1662,1783:1787),
+                                 '1 block left from phase 2 line',
+                          ifelse(Block %in% c(1676:1678, 1687:1689, 1801:1803),
+                           '2 blocks from stations -phase 2- (1 block right from line)',
+                          ifelse(Block %in% c(1669:1675,1680:1684,1795:1797),
+                                 '1 block right from phase 2 line',
+                          ifelse(Block %in% c(1625:1640,1643:1645,1767:1776),
+                                 '2-3 blocks left from phase 2 line',
+                          ifelse(Block %in% c(1691,1693:1696,1699:1705,1708:1711,1713,1715:1716,                                              1806:1808,1815,1816,1811,1813),
+                                 '2-3 blocks right from phase 2 line', 'other')))))))))))))))))))))
+#write.table(data, file="Permits_Distance-to-2nd-ave-line.csv",sep=",",row.names=F)
+```
+
+Phase 1 only - Add a column called "Distance" and use the block number to record distance from 2nd ave line (in this version we consider pahse 1 only):
+
+```{r}
+#permits_upper_east <- read.csv("DOB_Permit_Issuance-up_east.csv")
+#permits_upper_east$Filing.Date = as.Date(permits_upper_east$Filing.Date, format = "%m/%d/%Y")
+#permits_upper_east$Issuance.Date = as.Date(permits_upper_east$Issuance.Date, format = "%m/%d/%Y")
+#permits_upper_east$Expiration.Date = as.Date(permits_upper_east$Expiration.Date, format = "%m/%d/%Y")
+#permits_upper_east$Job.Start.Date = as.Date(permits_upper_east$Job.Start.Date, format = "%m/%d/%Y")
+
+data_phase1 <- permits_upper_east %>%
+  mutate(Distance = ifelse(Block %in% c(1424:1427, 1529:1532, 1539:1541),
+                           '1 block from station entrance (left side)',
+                          ifelse(Block %in% c(1423,1428:1433,1525:1528,1533:1538,1646),
+                                 '1 block left from line',
+                          ifelse(Block %in% c(1444:1447,1546:1549,1556:1558),
+                                  '1 block from station entrance (right side)',
+                          ifelse(Block %in% c(1443,1448:1453,1542:1545,1550:1555,1668),
+                                 '1 block right from line',
+                          ifelse(Block %in% c(1404:1407,1512:1515,1522:1524),
+                                  '2-3 blocks from station entrance (left side)',
+                          ifelse(Block %in% c(1403,1408:1413,1508:1511,1516:1521,1624),
+                                 '2-3 blocks left from line',
+                          ifelse(Block %in% c(1464:1467,1563:1566,1573),
+                                  '2 blocks from station entrance (right side)',
+                          ifelse(Block %in% c(1463,1468:1473,1559:1562,1567:1571,1690),
+                                 '2 blocks right from line',
+                          ifelse(Block %in% c(1482:1484,1580:1583),
+                                  '3 blocks from station entrance (right side)',
+                          ifelse(Block %in% c(1480,1485:1490,1576:1579,1584:1587),
+                                 '3 blocks right from line',
+                          ifelse(Block %in% c(1384:1387,1495:1498,1505:1507),
+                                  '4-5 blocks from station entrance (left side)',
+                          ifelse(Block %in% c(1383,1388:1393,1491:1494,1499:1504,1602),
+                                 '4-5 blocks left from line',
+                          ifelse(Block %in% c(1590, 1592),
+                                  '4 blocks from station entrance (right side)',
+                          ifelse(Block %in% c(1589),
+                                 '4 blocks right from line',
+                                 'other')))))))))))))))
+#write.table(data_phase1,file="Permits_Distance-to-2nd-ave-line_phase1_only.csv",sep=",",row.names=F)
+```
+
+Phase 1 only - Add a column called "Distance" and use the block number to record distance from 2nd ave line (in this version we consider pahse 1 only and less divisions of Distance):
+
+```{r}
+#permits_upper_east <- read.csv("DOB_Permit_Issuance-up_east.csv")
+#permits_upper_east$Filing.Date = as.Date(permits_upper_east$Filing.Date, format = "%m/%d/%Y")
+#permits_upper_east$Issuance.Date = as.Date(permits_upper_east$Issuance.Date, format = "%m/%d/%Y")
+#permits_upper_east$Expiration.Date = as.Date(permits_upper_east$Expiration.Date, format = "%m/%d/%Y")
+#permits_upper_east$Job.Start.Date = as.Date(permits_upper_east$Job.Start.Date, format = "%m/%d/%Y")
+
+data_phase1 <- permits_upper_east %>%
+  mutate(Distance = ifelse(Block %in% c(1424:1427, 1529:1532, 1539:1541,1423,1428:1433,1525:1528,1533:1538,1646),
+                                 '1 block left from line',
+                          ifelse(Block %in% c(1444:1447,1546:1549,1556:1558,1443,1448:1453,1542:1545,1550:1555,1668),
+                                 '1 block right from line',
+                          ifelse(Block %in% c(1404:1407,1512:1515,1522:1524,1403,1408:1413,1508:1511,1516:1521,1624),
+                                 '2-3 blocks left from line',
+                          ifelse(Block %in% c(1464:1467,1563:1566,1573,1463,1468:1473,1559:1562,1567:1571,1690),
+                                 '2 blocks right from line',
+                          ifelse(Block %in% c(1482:1484,1580:1583,1480,1485:1490,1576:1579,1584:1587),
+                                 '3 blocks right from line',
+                          ifelse(Block %in% c(1384:1387,1495:1498,1505:1507,1383,1388:1393,1491:1494,1499:1504,1602),
+                                 '4-5 blocks left from line',
+                          ifelse(Block %in% c(1590, 1592,1589),
+                                 '4 blocks right from line',
+                                 'other'))))))))
+#write.table(data_phase1,file="Permits_Distance-to-2nd-ave-line_phase1_only.csv",sep=",",row.names=F)
+```
+
+
+Phase 1 only - Add a column called "Distance" and use the block number to record distance from 2nd ave line (in this version we consider pahse 1 only and even less divisions of Distance):
+
+```{r}
+#permits_upper_east <- read.csv("DOB_Permit_Issuance-up_east.csv")
+#permits_upper_east$Filing.Date = as.Date(permits_upper_east$Filing.Date, format = "%m/%d/%Y")
+#permits_upper_east$Issuance.Date = as.Date(permits_upper_east$Issuance.Date, format = "%m/%d/%Y")
+#permits_upper_east$Expiration.Date = as.Date(permits_upper_east$Expiration.Date, format = "%m/%d/%Y")
+#permits_upper_east$Job.Start.Date = as.Date(permits_upper_east$Job.Start.Date, format = "%m/%d/%Y")
+
+data_phase1 <- permits_upper_east %>%
+  mutate(Distance = ifelse(Block %in% c(1424:1427, 1529:1532, 1539:1541,1423,1428:1433,1525:1528,1533:1538,1646,1404:1407,1512:1515,1522:1524,1403,1408:1413,1508:1511,1516:1521,1624,1384:1387,1495:1498,1505:1507,1383,1388:1393,1491:1494,1499:1504,1602),
+                                 '1-5 blocks left from line',
+                          ifelse(Block %in% c(1444:1447,1546:1549,1556:1558,1443,1448:1453,1542:1545,1550:1555,1668,1464:1467,1563:1566,1573,1463,1468:1473,1559:1562,1567:1571,1690,1482:1484,1580:1583,1480,1485:1490,1576:1579,1584:1587,1590, 1592,1589),'1-4 blocks right from line',
+                                 'other')))
+#write.table(data_phase1,file="Permits_Distance-to-2nd-ave-line_phase1_only.csv",sep=",",row.names=F)
+```
+
+
+
+Summarize by Filing.Date year and Distance:
+
+```{r}
+library(lubridate)
+data_phase1 <- data_phase1 %>%
+  group_by(Filing.Year = year(Filing.Date), Distance) %>%
+  summarise(Total = n()) %>%
+  arrange(Filing.Year) #arranges from lowest to highest value
+head(data_phase1)
+```
+
+
+Plot a Time Series to visually explore the data:
+
+```{r}
+ggplot(data_phase1, aes(Filing.Year, Total, color = Distance)) + geom_line() +
+    ggtitle("Filed building construction/remodelation permits") +
+    labs (x = "", y = "# of filed permits") +
+    theme_grey(16) +
+    theme(legend.title = element_blank())
+```
+
+
+Calculate % change / variation:
+
+```{r}
+#data/lag(data,-1) - 1
+data_phase1_var <- data_phase1 %>% group_by(Distance) %>% 
+  mutate(Variation = Total/lag(Total, 1)-1) %>% ungroup()
+head(data_phase1_var)
+```
+
+Plot a Time Series to visually explore the data:
+
+```{r fig.height=9, fig.width=9}
+ggplot(data_phase1_var, aes(Filing.Year, Variation, color = Distance)) + geom_line() +
+    ggtitle("Filed building construction/remodelation permits") +
+    labs (x = "", y = "# of filed permits") +
+    theme_grey(16) +
+    theme(legend.title = element_blank()) +
+    coord_flip()
+```
+
