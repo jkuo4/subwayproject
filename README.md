@@ -20,7 +20,7 @@ Convienence Benefits
 How much capacity does it free from other subway lines?
 How much commuting time does it save for residents ?
 How much it reduces the walking distance/time for nearby residents ?  
-What are the income groups living in these neighbords right now ? (Service to underserved neighborhoods, disadvantaged populace)
+What are the income groups living in these neighbords right now ? (Service to underserved neighborhoods, minorities, disabled)
 What kind of dogs live here? :wink: maybe, if make sense 
 ```
 
