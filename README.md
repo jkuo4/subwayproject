@@ -52,7 +52,7 @@ Give an example
 Jason
 
 ```
-plot walking distance from center of zip codes around 2nd ave to nearest subway (use google maps walking) -- sharon todo
+plot walking distance from center of zip codes around 2nd ave to nearest subway (use google maps walking) -- sharon todo google api part
 get median hourly wage statistics by zip code
 get avg increase in real estate prices by zip code Q, hudson yards line project that to neighborhoods around 2nd ave line, multiply by avg property tax rate
 avg new business startups, income by business, business tax rates
