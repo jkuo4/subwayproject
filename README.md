@@ -65,13 +65,14 @@ get number of subway riders by turnstile data in nearest subways, reduce that by
 * [R](http://www.R.org) - Data exploration and extraction
 * [Google API](https://www.google.com/) - Estimated walk times
 * [Shiny](https://rometools.github.io/rome/) - Generate interactive data
+* [D3] - Interactive plots
 
 
 ## Authors
 
 * **Addison Li** - *Creative Designer* - [AddyYing](https://github.com/AddyYing)
 * **Andrés Rios** - *Mapping Genius* - [Deibyrios](https://github.com/Deibyrios)
-* **Jason Kuo** - *Readme Creator* - [Jkuo4](https://github.com/jkuo4)
+* **Jason Kuo** - *Insightful Architect* - [Jkuo4](https://github.com/jkuo4)
 * **Sharon Tsao** - *Planning Expert and Makes Great Cookies* - [Blooraspberry](https://github.com/Blooraspberry)
 
 
