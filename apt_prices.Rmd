@@ -12,14 +12,16 @@ library(ggplot2)
 library("readxl")
 library(reshape)
 library(dplyr)
+
+# API key for google maps: AIzaSyB9V8yV0-ZP28Tq8hGPLLut876l0ZO3PXQ
 ```
 
 Importing files
 
 ```{r}
-data14 <- read_excel("2014_manhattan.xls",  col_names = TRUE, sheet = "Manhattan", skip = 4)
-data15 <- read_excel("2015_manhattan.xls",  col_names = TRUE, sheet = "Manhattan", skip = 4)
-data16 <- read_excel("2016_manhattan.xls",  col_names = TRUE, sheet = "Manhattan", skip = 4)
+data14 <- read_excel("data/2014_manhattan.xls",  col_names = TRUE, sheet = "Manhattan", skip = 4)
+data15 <- read_excel("data/2015_manhattan.xls",  col_names = TRUE, sheet = "Manhattan", skip = 4)
+data16 <- read_excel("data/2016_manhattan.xls",  col_names = TRUE, sheet = "Manhattan", skip = 4)
 
 df_list <- list(data14, data15, data16)
 data <- merge_recurse(df_list)
